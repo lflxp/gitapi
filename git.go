@@ -18,6 +18,7 @@ type Git struct {
 	GoVersion 	string
 	CmdString	string
 	lock 		sync.Mutex
+	Args 		interface{}
 }
 //初始化 检测git命令安装和url是否为git项目
 func (this *Git) Init() error {
