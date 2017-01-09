@@ -2,19 +2,17 @@ package gitapi
 
 import (
 	"os/exec"
-	"fmt"
 )
 
 //执行命令 返回结果
-func ExecCommand(commands string) string {
+func ExecCommand(commands string) (string,error) {
     out,err := exec.Command("bash", "-c", commands).Output()
-    CheckErr(err)
-    return string(out)
+    return string(out),err
 }
 
-func CheckErr(err error) {
+func CheckErr(rs string,err error) string {
 	if err != nil {
-		fmt.Println(err.Error())
-		panic(err)
+		return err.Error()
 	}
+	return rs
 }
