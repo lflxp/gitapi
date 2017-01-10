@@ -18,7 +18,7 @@ type Git struct {
 	GoVersion 	string
 	CmdString	string
 	lock 		sync.Mutex
-	Args 		interface{}
+	Args 		[]string
 }
 //初始化 检测git命令安装和url是否为git项目
 func (this *Git) Init() error {
@@ -56,7 +56,7 @@ func (this *Git) Init() error {
 //		  ignore changes to submodules, optional when: all, dirty, untracked. (Default: all)
 //--column[=<style>]    list untracked files in columns
 //返回未被管理的文件列表 git status -s |grep '??'
-func (this *Git) Status(args ...string) string {
+func (this *Git) Status(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -71,10 +71,10 @@ func (this *Git) Status(args ...string) string {
 	}
 
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //创建裸库 init
-func (this *Git) Bare(path string) string {
+func (this *Git) Bare(path string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -82,10 +82,10 @@ func (this *Git) Bare(path string) string {
 	}
 
 	rs,err := ExecCommand("git init "+path)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //添加操作 git add .
-func (this *Git) Add(args ...string) string {
+func (this *Git) Add(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -99,10 +99,10 @@ func (this *Git) Add(args ...string) string {
 		cmd = this.CmdString+" add "+strings.Join(args," ")
 	}
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //添加本地库操作 git commit -m "123"
-func (this *Git) Commit(common string) string {
+func (this *Git) Commit(common string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -110,10 +110,10 @@ func (this *Git) Commit(common string) string {
 	}
 
 	rs,err := ExecCommand(this.CmdString+" commit -m \""+common+"\"")
-	return CheckErr(rs,err)
+	return rs,err
 }
 //查看当前分支
-func (this *Git) Branch() string {
+func (this *Git) Branch() (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -121,7 +121,7 @@ func (this *Git) Branch() string {
 	}
 
 	rs,err := ExecCommand(this.CmdString+" branch")
-	return CheckErr(rs,err)
+	return rs,err
 }
 //查看git log --grep=ok
 //http://www.cnblogs.com/gbyukg/archive/2011/12/12/2285419.html
@@ -130,7 +130,7 @@ func (this *Git) Branch() string {
 //git log --pretty=format:"%h|%an|%ae|%ar|%cn|%ce|%cr|%s"
 //git log --pretty=format:"%h|%an|%ae|%ar|%cn|%ce|%cr|%s" --graph
 //git log --pretty=oneline --graph --stat
-func (this *Git) Log(args ...string) string {
+func (this *Git) Log(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -145,10 +145,10 @@ func (this *Git) Log(args ...string) string {
 	}
 
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //切换分支 没有分支就直接创建
-func (this *Git) CheckOut(branch string,args ...string) string {
+func (this *Git) CheckOut(branch string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -162,10 +162,10 @@ func (this *Git) CheckOut(branch string,args ...string) string {
 		cmd = this.CmdString+"checkout "+branch
 	}
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //pull操作 origin name is unchanged
-func (this *Git) Pull(branch ...string) string {
+func (this *Git) Pull(branch ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -179,10 +179,10 @@ func (this *Git) Pull(branch ...string) string {
 		cmd = this.CmdString+"pull origin "+branch[0]
 	}
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //push操作 origin name is unchanged
-func (this *Git) Push(branch ...string) string {
+func (this *Git) Push(branch ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -196,22 +196,22 @@ func (this *Git) Push(branch ...string) string {
 		cmd = this.CmdString+"push origin "+branch[0]
 	}
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //获取活动分支、未被管理的文件和判断是否有变更
 //false 干净的
 //true 有新增
-func (this *Git) Is_dirty() bool {
-	data := this.Status("-s|wc -l")
+func (this *Git) Is_dirty() (bool,error) {
+	data,err := this.Status("-s|wc -l")
 	rs := strings.Split(data,"\n")
 	if rs[0] == "0" {
-		return false
+		return false,err
 	} else {
-		return true
+		return true,err
 	}
 }
 //Clone 克隆和初始化一个新的仓库
-func (this *Git) Clone(path string,args ...string) string {
+func (this *Git) Clone(path string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -226,10 +226,10 @@ func (this *Git) Clone(path string,args ...string) string {
 	}
 
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //回退 reset
-func (this *Git) Reset(tags string,args ...string) string {
+func (this *Git) Reset(tags string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -244,10 +244,10 @@ func (this *Git) Reset(tags string,args ...string) string {
 	}
 
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //查看tag show detail
-func (this *Git) Show(tags string) string {
+func (this *Git) Show(tags string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if st := CheckErr("",this.Init()); st != "" {
@@ -255,13 +255,13 @@ func (this *Git) Show(tags string) string {
 	}
 
 	rs,err := ExecCommand(this.CmdString+"show "+tags)
-	return CheckErr(rs,err)
+	return rs,err
 }
 //执行shell命令
-func (this *Git) UnsafeCmd(cmd string) string {
+func (this *Git) UnsafeCmd(cmd string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
 
 	rs,err := ExecCommand(cmd)
-	return CheckErr(rs,err)
+	return rs,err
 }
