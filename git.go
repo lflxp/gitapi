@@ -20,14 +20,21 @@ type Git struct {
 	lock 		sync.Mutex
 	Args 		string
 	Kargs 		[]string
+	Debug 		bool
 }
 //初始化 检测git命令安装和url是否为git项目
 func (this *Git) Init() error {
 	if this.Url == "" {
+		if this.Debug {
+			Log.Error("Url is empty")
+		}
 		return errors.New("Url is empty")
 	}
 	version,err := ExecCommand("git version")
 	if err != nil {
+		if this.Debug {
+			Log.Error("GIT IS NOT INSTALL")
+		}
 		return errors.New("GIT IS NOT INSTALL")
 	}
 
@@ -39,6 +46,9 @@ func (this *Git) Init() error {
 	this.CmdString = "git -C "+this.Url+" "
 	_,err = ExecCommand(this.CmdString+" status")
 	if err != nil {
+		if this.Debug {
+			Log.Error(fmt.Sprintf("%s IS NOT a git repository (or any of the parent directories): .git",this.Url))
+		}
 		return errors.New(fmt.Sprintf("%s IS NOT a git repository (or any of the parent directories): .git",this.Url))
 	}
 	return nil
@@ -60,6 +70,7 @@ func (this *Git) Init() error {
 func (this *Git) Status(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(args) != 0 {
@@ -69,6 +80,12 @@ func (this *Git) Status(args ...string) (string,error) {
 	}
 
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //创建裸库 init
@@ -77,12 +94,19 @@ func (this *Git) Bare(path string) (string,error) {
 	defer this.lock.Unlock()
 
 	rs,err := ExecCommand("git init "+path)
+	if this.Debug {
+		Log.Debug("git init "+path)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //添加操作 git add .
 func (this *Git) Add(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(args) == 0 {
@@ -91,22 +115,42 @@ func (this *Git) Add(args ...string) (string,error) {
 		cmd = this.CmdString+" add "+strings.Join(args," ")
 	}
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //添加本地库操作 git commit -m "123"
 func (this *Git) Commit(common string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	rs,err := ExecCommand(this.CmdString+" commit -m \""+common+"\"")
+	if this.Debug {
+		Log.Debug(this.CmdString+" commit -m \""+common+"\"")
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //查看当前分支
 func (this *Git) Branch() (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	rs,err := ExecCommand(this.CmdString+" branch")
+	if this.Debug {
+		Log.Debug(this.CmdString+" branch")
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //查看git log --grep=ok
@@ -119,6 +163,7 @@ func (this *Git) Branch() (string,error) {
 func (this *Git) Log(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(args) == 0 {
@@ -128,12 +173,19 @@ func (this *Git) Log(args ...string) (string,error) {
 	}
 
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //切换分支 没有分支就直接创建
 func (this *Git) CheckOut(branch string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(args) == 1 && args[0] == "-b" {
@@ -142,12 +194,19 @@ func (this *Git) CheckOut(branch string,args ...string) (string,error) {
 		cmd = this.CmdString+"checkout "+branch
 	}
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //pull操作 origin name is unchanged
 func (this *Git) Pull(branch ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(branch) == 0 {
@@ -156,12 +215,19 @@ func (this *Git) Pull(branch ...string) (string,error) {
 		cmd = this.CmdString+"pull origin "+branch[0]
 	}
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //push操作 origin name is unchanged
 func (this *Git) Push(branch ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(branch) == 0 {
@@ -170,6 +236,12 @@ func (this *Git) Push(branch ...string) (string,error) {
 		cmd = this.CmdString+"push origin "+branch[0]
 	}
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //获取活动分支、未被管理的文件和判断是否有变更
@@ -179,8 +251,16 @@ func (this *Git) Is_dirty() (bool,error) {
 	data,err := this.Status("-s|wc -l")
 	rs := strings.Split(data,"\n")
 	if rs[0] == "0" {
+		if this.Debug {
+			Log.Info(fmt.Sprintf("Is_dirty is %s : %s","false",err.Error()))
+		}
 		return false,err
 	} else {
+		if this.Debug {
+			if this.Debug {
+				Log.Info(fmt.Sprintf("Is_dirty is %s : %s","true",err.Error()))
+			}
+		}
 		return true,err
 	}
 }
@@ -197,12 +277,19 @@ func (this *Git) Clone(path string,args ...string) (string,error) {
 	}
 
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //回退 reset
 func (this *Git) Reset(tags string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	var cmd string
 	if len(args) == 0 {
@@ -212,14 +299,28 @@ func (this *Git) Reset(tags string,args ...string) (string,error) {
 	}
 
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //查看tag show detail
 func (this *Git) Show(tags string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
+	this.CmdString = "git -C "+this.Url+" "
 
 	rs,err := ExecCommand(this.CmdString+"show "+tags)
+
+	if this.Debug {
+		Log.Debug(this.CmdString+"show ")
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
 //执行shell命令
@@ -228,5 +329,11 @@ func (this *Git) UnsafeCmd(cmd string) (string,error) {
 	defer this.lock.Unlock()
 
 	rs,err := ExecCommand(cmd)
+	if this.Debug {
+		Log.Debug(cmd)
+		if err != nil {
+			Log.Error(err.Error())
+		}
+	}
 	return rs,err
 }
