@@ -18,7 +18,8 @@ type Git struct {
 	GoVersion 	string
 	CmdString	string
 	lock 		sync.Mutex
-	Args 		[]string
+	Args 		string
+	Kargs 		[]string
 }
 //初始化 检测git命令安装和url是否为git项目
 func (this *Git) Init() error {
@@ -59,9 +60,6 @@ func (this *Git) Init() error {
 func (this *Git) Status(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(args) != 0 {
@@ -77,9 +75,6 @@ func (this *Git) Status(args ...string) (string,error) {
 func (this *Git) Bare(path string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	rs,err := ExecCommand("git init "+path)
 	return rs,err
@@ -88,9 +83,6 @@ func (this *Git) Bare(path string) (string,error) {
 func (this *Git) Add(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(args) == 0 {
@@ -105,9 +97,6 @@ func (this *Git) Add(args ...string) (string,error) {
 func (this *Git) Commit(common string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	rs,err := ExecCommand(this.CmdString+" commit -m \""+common+"\"")
 	return rs,err
@@ -116,9 +105,6 @@ func (this *Git) Commit(common string) (string,error) {
 func (this *Git) Branch() (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	rs,err := ExecCommand(this.CmdString+" branch")
 	return rs,err
@@ -133,9 +119,6 @@ func (this *Git) Branch() (string,error) {
 func (this *Git) Log(args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(args) == 0 {
@@ -151,9 +134,6 @@ func (this *Git) Log(args ...string) (string,error) {
 func (this *Git) CheckOut(branch string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(args) == 1 && args[0] == "-b" {
@@ -168,9 +148,6 @@ func (this *Git) CheckOut(branch string,args ...string) (string,error) {
 func (this *Git) Pull(branch ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(branch) == 0 {
@@ -185,9 +162,6 @@ func (this *Git) Pull(branch ...string) (string,error) {
 func (this *Git) Push(branch ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(branch) == 0 {
@@ -214,9 +188,6 @@ func (this *Git) Is_dirty() (bool,error) {
 func (this *Git) Clone(path string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(args) == 0 {
@@ -232,9 +203,6 @@ func (this *Git) Clone(path string,args ...string) (string,error) {
 func (this *Git) Reset(tags string,args ...string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	var cmd string
 	if len(args) == 0 {
@@ -250,9 +218,6 @@ func (this *Git) Reset(tags string,args ...string) (string,error) {
 func (this *Git) Show(tags string) (string,error) {
 	this.lock.Lock()
 	defer this.lock.Unlock()
-	if st := CheckErr("",this.Init()); st != "" {
-		return st
-	}
 
 	rs,err := ExecCommand(this.CmdString+"show "+tags)
 	return rs,err
