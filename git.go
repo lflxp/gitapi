@@ -351,13 +351,17 @@ func (this *Git) UnsafeCmd(cmd string) (string,error) {
 func (this *Git) Gotty(server_url string,Kargs ...string) (string,error) {
 	port,command := Kargs[0],Kargs[1]
 	if IsExistFile("/tmp/gotty") {
+		fmt.Println("/tmp/gotty is exist ")
+		fmt.Println(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
 		rs,err := this.UnsafeCmd(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
 		return rs,err
 	} else {
+		fmt.Println("/tmp/gotty not exist")
 		err := Download("http://"+server_url+"/static/software/gotty","/tmp/gotty")
 		if err != nil {
 			return "http://"+server_url+"/static/software/gotty is bad",err
 		}
+		fmt.Println(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
 		rs,err := this.UnsafeCmd(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
 		return rs,err
 	}

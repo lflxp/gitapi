@@ -6,6 +6,7 @@ import (
 	"github.com/op/go-logging"
 	"net/http"
 	"io/ioutil"
+	"fmt"
 )
 
 var Log = logging.MustGetLogger("cst")
@@ -72,6 +73,7 @@ func IsExistFile(file string) bool {
 func Download(url,dest string) error {
 	resp,err := http.Get(url)
 	if err != nil {
+		fmt.Println(fmt.Sprintf("DownLoad error %s ",err.Error()))
 		return err
 	}
 
@@ -79,12 +81,15 @@ func Download(url,dest string) error {
 
 	body,err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println(fmt.Sprintf("DownLoad error %s ",err.Error()))
 		return err
 	}
 
 	err = ioutil.WriteFile(dest,body,0777)
 	if err != nil {
+		fmt.Println(fmt.Sprintf("DownLoad error %s ",err.Error()))
 		return err
 	}
+	fmt.Println(fmt.Sprintf("DownLoad %s %s success",url,dest))
 	return nil
 }
