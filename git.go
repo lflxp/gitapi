@@ -337,3 +337,27 @@ func (this *Git) UnsafeCmd(cmd string) (string,error) {
 	}
 	return rs,err
 }
+//# 启动log日志查看
+//    def exposed_checklog(self,server_ip,client_port,command):
+//        #判断文件是否存在
+//        if not os.path.exists(r'/tmp/gotty'):
+//            urls = server_ip+'/static/gotty'
+//            cmd = 'wget -P /tmp '+urls+';chmod +x /tmp/gotty'
+//            os.system(cmd)
+//        # 启动gotty docker logs -f odoo
+//        cmd1 = 'chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "' + client_port + '" --once -w '+command+'> /tmp/gotty.log &'
+//        status = os.system(cmd1)
+//        return status
+func (this *Git) Gotty(server_url,port,command string) (string,error) {
+	if IsExistFile("/tmp/gotty") {
+		rs,err := this.UnsafeCmd(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
+		return rs,err
+	} else {
+		err := Download("http://"+server_url+"/static/software/gotty","/tmp/gotty")
+		if err != nil {
+			return "http://"+server_url+"/static/software/gotty is bad",err
+		}
+		rs,err := this.UnsafeCmd(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
+		return rs,err
+	}
+}

@@ -6,6 +6,7 @@
       <root url="file://$PROJECT_DIR$/../../../golang.org" />
       <root url="file://$PROJECT_DIR$/../../../ip_scan" />
       <root url="file://$PROJECT_DIR$/../../../services" />
+      <root url="file://$PROJECT_DIR$/../../../lxptest" />
       <root url="file://$PROJECT_DIR$/../../../test" />
       <root url="file://$PROJECT_DIR$/../../../lxp" />
       <root url="file://$PROJECT_DIR$/../../../goinone" />
@@ -19,6 +20,7 @@
       <root url="file://$PROJECT_DIR$/../../../golang.org" />
       <root url="file://$PROJECT_DIR$/../../../ip_scan" />
       <root url="file://$PROJECT_DIR$/../../../services" />
+      <root url="file://$PROJECT_DIR$/../../../lxptest" />
       <root url="file://$PROJECT_DIR$/../../../test" />
       <root url="file://$PROJECT_DIR$/../../../lxp" />
       <root url="file://$PROJECT_DIR$/../../../goinone" />

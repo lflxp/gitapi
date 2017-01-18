@@ -4,6 +4,8 @@ import (
 	"os"
 	"os/exec"
 	"github.com/op/go-logging"
+	"net/http"
+	"io/ioutil"
 )
 
 var Log = logging.MustGetLogger("cst")
@@ -46,4 +48,43 @@ func CheckErr(rs string,err error) string {
 		return err.Error()
 	}
 	return rs
+}
+
+//判断文件是否存在
+func IsExistFile(file string) bool {
+	_,err := os.Open(file)
+	if err != nil && os.IsNotExist(err) {
+		return false
+	} else {
+		return true
+	}
+}
+
+//func main() {
+//	err := Download("http://172.20.11.25/static/software/gotty","/tmp/gotty_lllll")
+//	if err != nil {
+//		panic(err)
+//	} else {
+//		println("ok")
+//	}
+//}
+//通过url下载文件
+func Download(url,dest string) error {
+	resp,err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	body,err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(dest,body,0777)
+	if err != nil {
+		return err
+	}
+	return nil
 }
