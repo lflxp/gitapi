@@ -348,7 +348,8 @@ func (this *Git) UnsafeCmd(cmd string) (string,error) {
 //        cmd1 = 'chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "' + client_port + '" --once -w '+command+'> /tmp/gotty.log &'
 //        status = os.system(cmd1)
 //        return status
-func (this *Git) Gotty(server_url,port,command string) (string,error) {
+func (this *Git) Gotty(server_url string,Kargs ...string) (string,error) {
+	port,command := Kargs[0],Kargs[1]
 	if IsExistFile("/tmp/gotty") {
 		rs,err := this.UnsafeCmd(`chmod +x /tmp/gotty && export TERM=xterm && /tmp/gotty -c cst:online -A gotty.log --title-format "{{ .RemoteAddr }} {{ .Hostname }}" -p "`+port+`" --once -w `+command+` >/tmp/gotty.log &`)
 		return rs,err
